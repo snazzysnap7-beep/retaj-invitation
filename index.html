@@ -308,9 +308,6 @@ a{color:inherit}
 .show-start .pin.start,.show-start .mlbl.startl,.show-street .mlbl.street,.arrived .college,.arrived .mlbl.coll,.arrived .pin.end{opacity:1}
 .travelling .head{opacity:1}
 
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{transition-duration:.01ms!important;transition-delay:0s!important;animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
-}
 </style>
 </head>
 <body>
@@ -428,7 +425,8 @@ const MAP = {"bat":"M558.6 2591.6L520.7 1790.6L603.9 1368.2","w":1219,"h":2892,"
 const $ = s => document.querySelector(s);
 const frame = $('#frame'), stage = $('#stage'), hit = $('#hit');
 const V = { ring: $('#vRing'), answer: $('#vAnswer'), door: $('#vDoor'), pull: $('#vPull') };
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* the story is the content: it plays in full for every viewer, whatever the phone's motion setting */
+const reduce = false;
 const rand = (a, b) => a + Math.random() * (b - a);
 
 /* ---------- sequencing ---------- */
@@ -860,7 +858,7 @@ function buildMap() {
   M.head = svgEl('circle', { class: 'head', r: 4 }, cam);
   M.pinEnd = svgEl('circle', { class: 'pin end', cx: MAP.cc[0], cy: MAP.cc[1], r: 5 }, cam);
   M.lblColl = svgEl('text', { class: 'mlbl coll', 'text-anchor': 'middle' }, cam);
-  ['COLLEGE OF', 'COMPUTER TECHNOLOGY'].forEach((t, i) => { const s = svgEl('tspan', { dy: i ? '1.5em' : 0 }, M.lblColl); s.textContent = t; });
+  ['COLLEGE OF', 'COMPUTER TECHNOLOGY'].forEach(t => { const s = svgEl('tspan', {}, M.lblColl); s.textContent = t; });
   M.L = M.route.getTotalLength(); M.batLen = document.getElementById('batPath').getTotalLength();
   $('#mNorthG').setAttribute('transform', `rotate(${MAP.north})`);
   M.built = true;
@@ -894,7 +892,7 @@ function applyCam() {
   /* small screens: rather than show a clipped street name, leave it out */
   try { M.street.style.visibility = M.street.getComputedTextLength() > M.batLen * .95 ? 'hidden' : ''; } catch (e) {}
   M.lblColl.setAttribute('text-anchor', anchor); M.lblColl.setAttribute('x', lx); M.lblColl.setAttribute('y', ly);
-  M.lblColl.querySelectorAll('tspan').forEach(t => t.setAttribute('x', lx));
+  M.lblColl.querySelectorAll('tspan').forEach((t, i) => { t.setAttribute('x', lx); t.setAttribute('y', ly + i * 1.5 * 9.5 * k); });
   const steps = [50, 100, 200, 500, 1000, 2000];
   let n = steps[0]; for (const s of steps) if (s * c.s <= w * .2) n = s;
   $('#mBar').style.width = (n * c.s).toFixed(1) + 'px';
